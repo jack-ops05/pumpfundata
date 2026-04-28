@@ -1,0 +1,49 @@
+services:
+  database:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pumpfundata
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres_init.sql:/docker-entrypoint-initdb.d/postgres_init.sql
+  collector:
+    build:
+      context: ./src/collector
+      dockerfile: Dockerfile
+    container_name: collector
+    restart: always
+    depends_on:
+      - database
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: pumpfundata
+      DB_USER: writer
+      DB_PASSWORD: password
+    volumes:
+      - ./src/collector:/collector
+  api:
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile
+    container_name: api
+    restart: always
+    depends_on:
+      - database
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: pumpfundata
+      DB_USER: reader
+      DB_PASSWORD: password
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/src/api:/api
+volumes:
+    pgdata:

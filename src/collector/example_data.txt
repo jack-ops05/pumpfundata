@@ -1,0 +1,34 @@
+TX_TYPE: CREATE
+{
+    'signature': '3EqFLQSn5EmpDunZGPfwa3WhANhDGznHnfNAQUQ6JDWWnyzBjhukVZM7tz6apFYCKZbz6TafRyM8UmVHSinXDqoy',
+    'mint': 'Co1XYBLQCHrCwfoAVf6x4rgeJzn2wi83y3sdGggCpump',
+    'traderPublicKey': '3Amwf8J9QDKLAArMBD6PkhC8fuWtuBJne5fDBa4VC3gZ',
+    'txType': 'create',
+    'initialBuy': 15458386.007788,
+    'solAmount': 0.438518517,
+    'bondingCurveKey': '9ZKPPFsiJkv8zRtczFGap37arzU2tod33hjXBot9fp3s',
+    'vTokensInBondingCurve': 1057541613.992212,
+    'vSolInBondingCurve': 30.438518516999988,
+    'marketCapSol': 28.782336424658315,
+    'name': 'racist',
+    'symbol': 'Carlos',
+    'uri': 'https://ipfs.io/ipfs/bafkreibj2c3oevbpbqdarcd4rw44go3f4chhxfl3wjvegtucybsqtmzwuq',
+    'is_mayhem_mode': True,
+    'pool': 'pump'
+}
+
+TX_TYPE: BUY/SELL
+{
+    'signature': '44A12sjyYMZmDNeh4zFNopkBQunMXL4981jYNnbh47QsNvrX51ZEaRTDn9hTUYXifKb7aYRGYhE8xKKkshFxcvkk',
+    'mint': '2uchpjvWT3LLd8uLXDXgX6BnY9ZQo5XKRwxp1nFhpump',
+    'traderPublicKey': '6hQSw5JDEjVvqFes2vwGnYFq9b44Yjq9wxeNVBYJpHSb',
+    'txType': 'buy',
+    'tokenAmount': 1536556.860114,
+    'solAmount': 0.049382714,
+    'newTokenBalance': 1536556.860114,
+    'bondingCurveKey': 'AuUsbHgn1GqeCjcKLy5DZWhjL9BqoBgbxZJ8WLPq2ptU',
+    'vTokensInBondingCurve': 1000032091.182513,
+    'vSolInBondingCurve': 32.188967017984524,
+    'marketCapSol': 32.187934069117595,
+    'pool': 'pump'
+}
