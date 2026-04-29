@@ -25,6 +25,8 @@ services:
       DB_NAME: pumpfundata
       DB_USER: writer
       DB_PASSWORD: password
+      TELEGRAM_BOT_TOKEN: None
+      TELEGRAM_CHAT_ID: None
     volumes:
       - ./src/collector:/collector
   api:
@@ -44,6 +46,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/src/api:/api
+      - ./src/api:/api
 volumes:
     pgdata:

@@ -3,10 +3,11 @@ import asyncpg
 import logging
 import os
 import states
+from telegram_alert import send_alert
 
 LOG = logging.getLogger('main')
 
-async def db_listener():
+async def db_listener(httpxClient):
 
     await asyncio.sleep(30)
 
@@ -30,4 +31,5 @@ async def db_listener():
                 )
             LOG.info('Inserted token into table')
         except Exception as ex:
-            LOG.error(f'DB listener error // Exception: {ex}')
+            LOG.error(f'DB insertion error // Exception: {ex}')
+            await send_alert(httpxClient, msg='🟥 ALERT: Database insertion failed')

@@ -1,5 +1,6 @@
 import asyncio
 from database import db_listener
+import httpx
 import logging
 from pumpportal import connect_pumpportal
 
@@ -7,8 +8,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(
 LOG = logging.getLogger('main')
 
 async def main():
-    asyncio.create_task(db_listener())
-    await connect_pumpportal()
+    async with httpx.AsyncClient() as httpxClient:
+        asyncio.create_task(db_listener(httpxClient))
+        await connect_pumpportal(httpxClient)
 
 if __name__ == '__main__':
     try:

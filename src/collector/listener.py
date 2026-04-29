@@ -3,23 +3,25 @@ from datetime import datetime, timezone
 import json
 import logging
 import states
+from telegram_alert import send_alert
 from tracker import track_mint
+import websockets
 
 LOG = logging.getLogger('main')
 
-async def listener(ws):
+async def listener(httpxClient, ws):
 
     while True:
         try:
             msg = await ws.recv()
             data = json.loads(msg)
 
-            data['timestamp'] = datetime.now(timezone.utc)
             mint = data.get('mint')
-            tx_type = data.get('txType')
-
             if mint is None:
                 continue
+
+            data['timestamp'] = datetime.now(timezone.utc)
+            tx_type = data['txType']
 
             if tx_type == 'create':
                 pool = data['pool']
@@ -33,5 +35,16 @@ async def listener(ws):
             if tx_type in ['buy', 'sell']:
                 queue = states.token_queues[mint]
                 await queue.put(data)
+
+        except websockets.exceptions.ConnectionClosedOK:
+            LOG.info('Websocket closed normally')
+            await send_alert(httpxClient, msg='🟥 ALERT: Pumpportal websocket closed gracefully')
+            break
+
+        except websockets.exceptions.ConnectionClosedError as ex:
+            LOG.info(f'Websocket closed unexpectedly | {ex}')
+            await send_alert(httpxClient, msg='🟥 ALERT: Pumpportal websocket closed unexpectedly')
+            break
+
         except Exception as ex:
-            LOG.error(f'Listener error // Exception: {ex}')
+            LOG.error(f'Listener error | {ex}')
