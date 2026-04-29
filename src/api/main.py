@@ -21,16 +21,13 @@ def connect_to_database():
             host=os.getenv('DB_HOST'),
             port=os.getenv('DB_PORT')
         )
-        LOG.info('Connected to database')
         return conn
     except Exception as ex:
-        LOG.error(f'Failed to connect to database // Exception: {ex}')
+        LOG.error(f'Failed to connect to database | {ex}')
         return None
 
 @app.get('/getEvents')
 def get_events(start, end):
-
-    LOG.info('Recieved GET request for /getEvents')
 
     try:
         start = datetime.fromisoformat(start)

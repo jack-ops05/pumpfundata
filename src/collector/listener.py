@@ -9,10 +9,11 @@ import websockets
 
 LOG = logging.getLogger('main')
 
-async def listener(httpxClient, ws):
+async def listener(ws):
 
     while True:
         try:
+            #Wait for messages
             msg = await ws.recv()
             data = json.loads(msg)
 
@@ -21,29 +22,41 @@ async def listener(httpxClient, ws):
                 continue
 
             data['timestamp'] = datetime.now(timezone.utc)
+
             tx_type = data['txType']
 
+            #New token creation
             if tx_type == 'create':
+
+                #Safeguard websocket duplication errors
+                if mint in states.token_tasks:
+                    LOG.warning('Duplicate create message detected')
+                    continue
+
+                #Conditions for token
                 pool = data['pool']
                 if pool == 'pump':
-                    is_mayhem_mode = data['is_mayhem_mode']
-                    if is_mayhem_mode is False:
-                        states.tracking_tasks[mint] = asyncio.create_task(track_mint(ws, data))
-                        states.token_queues[mint] = asyncio.Queue()
-                        LOG.info(f'Tracking [{len(states.token_queues)}] tokens')
+                    mayhem_mode = data['is_mayhem_mode']
+                    if mayhem_mode is False:
 
-            if tx_type in ['buy', 'sell']:
-                queue = states.token_queues[mint]
+                        #Subscribe to/Track token
+                        states.token_tasks[mint] = {'task': asyncio.create_task(track_mint(ws, data)), 'queue': asyncio.Queue()}
+
+            #Route trade data
+            elif tx_type in ['buy', 'sell']:
+                if mint not in states.token_tasks:
+                    continue
+                queue = states.token_tasks[mint]['queue']
                 await queue.put(data)
 
-        except websockets.exceptions.ConnectionClosedOK:
-            LOG.info('Websocket closed normally')
-            await send_alert(httpxClient, msg='🟥 ALERT: Pumpportal websocket closed gracefully')
+        except websockets.exceptions.ConnectionClosedOK as ex:
+            LOG.warning(f'Websocket connection closed OK | {ex}')
+            await send_alert(msg=f'🟥 ALERT: Websocket connection closed OK | {ex}')
             break
 
         except websockets.exceptions.ConnectionClosedError as ex:
-            LOG.info(f'Websocket closed unexpectedly | {ex}')
-            await send_alert(httpxClient, msg='🟥 ALERT: Pumpportal websocket closed unexpectedly')
+            LOG.warning(f'Websocket connection closed ERROR | {ex}')
+            await send_alert(msg=f'🟥 ALERT: Websocket connection closed ERROR | {ex}')
             break
 
         except Exception as ex:

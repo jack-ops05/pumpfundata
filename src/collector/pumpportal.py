@@ -1,30 +1,27 @@
 import asyncio
 import json
 from listener import listener
-import logging
 import states
 from telegram_alert import send_alert
 import websockets
 
-LOG = logging.getLogger('main')
-
-async def connect_pumpportal(httpxClient):
+async def connect_pumpportal():
 
     URI = 'wss://pumpportal.fun/api/data'
+    initial_connection = True
 
     while True:
-        try:
-            async with websockets.connect(URI) as ws:
-                await ws.send(json.dumps({'method': 'subscribeNewToken'}))
-                LOG.info('Pumpportal websocket successfully connected')
-                await send_alert(httpxClient, msg='🟩 ALERT: Pumpportal websocket connection successful...')
-                await listener(httpxClient, ws)
+        #Subscribe to new tokens
+        async with websockets.connect(URI) as ws:
+            await ws.send(json.dumps({'method': 'subscribeNewToken'}))
+            if initial_connection is False:
+                await send_alert(msg='🟩 ALERT: Reconnected to websocket')
+            await listener(ws)
 
-        except Exception as ex:
-            LOG.error(f'Pumpportal websocket connection failed | {ex}')
-
-        for task in states.tracking_tasks.values():
+        #Clean up/Reconnect
+        for mint in states.token_tasks.values():
+            task = mint['task']
             task.cancel()
-        states.token_queues.clear()
-        await asyncio.sleep(3)
-        await send_alert(httpxClient, msg='🟨 ALERT: Pumpportal websocket reconnecting...')
+        states.token_tasks.clear()
+        initial_connection = False
+        await asyncio.sleep(5)
